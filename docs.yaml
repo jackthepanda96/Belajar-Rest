@@ -1,0 +1,197 @@
+openapi: 3.0.0
+info:
+  title: Belajar API Backend Immersive
+  version: "1.0"
+  description: |
+    Bagian ini adalah penjelasan dari dokumen Open API apa yang akan kita kerjakan. Sebagi materi pembahasan, kita akan berfokus menggunakan Project Pinjam Buku sebagai materi pembahasan.
+  contact:
+    name: Jerry Young
+    email: jerryoung2911@gmail.com
+tags:
+  - name: "User"
+    description: Servis yang mengorganisir data user
+  - name: "Book"
+    description: Servis yang mengorganisir data buku
+  - name: "Rent Book"
+    description: Servis yang mengorganisir data pinjam buku
+paths:
+  /user:
+    post:
+      description: Menambahkan data user baru
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ModelUser"
+            example:
+              Nama: Jerry
+              Email: jerry@alterra.id
+              Password: jerry123
+      tags:
+        - "User"
+      responses:
+        500:
+          $ref: "#/components/responses/500"
+    get:
+      description: Menampilkan seluruh data user
+      parameters:
+        - name: nama
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+      tags:
+        - "User"
+      responses:
+        '200':
+          description: Success get all data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ModelUser"
+              example:
+                - ID: 1
+                  Nama: Jerry
+                  Email: jerry@alterra.id
+                - ID: 2
+                  Nama: Tony
+                  Email: tony@learn.id
+        '500':
+          $ref: "#/components/responses/500"
+  /user/{id_user}:
+    get:
+      description: Tampilkan data user sesuai ID
+      parameters:
+        - name: id_user
+          in: path
+          required: true
+          schema:
+            type: integer
+      tags:
+        - "User"
+      responses:
+        '200':
+          description: Success get user data
+          content:
+            application/json:
+              schema:
+                type: object
+                $ref: "#/components/schemas/ModelUser"
+              example:
+                ID: 1
+                Nama: Jerry
+                Email: Jerry@alterra.id
+        '500':
+          $ref: "#/components/responses/500"
+    put:
+      description: Update data user sesuai ID
+      parameters:
+        - name: id_user
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ModelUser"
+            example:
+              Nama: Tono
+              Email: jerry@alterra.id
+      tags:
+        - "User"
+      responses:
+        '201':
+          description: Success update user data
+          content:
+            application/json:
+              schema:
+                type: object
+                $ref: "#/components/schemas/ModelUser"
+              example:
+                ID: 1
+                Nama: Tono
+                Email: jerry@alterra.id
+        '500':
+          $ref: "#/components/responses/500"
+    delete:
+      security:
+        - bearerAuth: []
+      
+      description: Hapus data user sesuai ID
+      parameters:
+        - name: id_user
+          in: path
+          required: true
+          schema:
+            type: integer
+      tags:
+        - "User"
+      responses:
+        '200':
+          description: Success delete user data
+          content:
+            application/json:
+              schema:
+                type: string
+              example:
+                success delete data
+        '500':
+          $ref: "#/components/responses/500"
+  # /book:
+  # /book/{id}:
+  # /book/owned/{id}:
+  # /rent:
+components:
+  securitySchemes:
+    bearerAuth:
+      description: JWT Authentication
+      type: http
+      scheme: bearer
+      bearerFormat: "JWT"
+  schemas:
+    ModelUser:
+      type: object
+      properties:
+        ID:
+          type: integer
+          format: int32
+        Nama:
+          type: string
+        Email:
+          type: string
+        Password: 
+          type: string
+          format: password
+    ModelBuku:
+      type: object
+      properties:
+        IDBuku:
+          type: integer
+          format: int32
+        Judul:
+          type: string
+        Penerbit:
+          type: string
+        Pemilik: #ID_User
+          type: integer
+          format: int32
+  responses:
+    500:
+      description: "Gagal mengolah data pada server"
+      content:
+        application/json:
+          schema:
+              type: string
+          example:
+            Terjadi kesalahan pada server
+            
