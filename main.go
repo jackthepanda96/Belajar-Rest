@@ -1,12 +1,12 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"strconv"
-	"strings"
+
+	"github.com/labstack/echo/v4"
 )
 
 type User struct {
@@ -19,91 +19,54 @@ var (
 	arrData []User
 )
 
-func HelloWorld(writer http.ResponseWriter, reader *http.Request) {
-	switch reader.Method {
-	case "GET":
-		writer.Header().Set("content-type", "application/json")
-		msg := "Hello World"
-		writer.Write([]byte(msg))
+func GetAll(c echo.Context) error {
+	res := map[string]interface{}{
+		"message": "Get all data",
+		"data":    arrData,
 	}
+	return c.JSON(http.StatusOK, res)
 }
 
-func UserHandle(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("content-type", "application/json")
-	switch r.Method {
-	case "POST":
-		var tmp User
-		decode := json.NewDecoder(r.Body)
-		err := decode.Decode(&tmp)
-		if err != nil {
-			log.Println("Cannot parse", err.Error())
-		}
-		log.Println(tmp)
-		arrData = append(arrData, tmp)
-		res := map[string]interface{}{
-			"message": "Success input data",
-			"data":    tmp,
-		}
-		send, err := json.Marshal(res)
-		if err != nil {
-			log.Println("Cannot send", err.Error())
-		}
-		w.Write(send)
-	case "GET":
-		res := map[string]interface{}{
-			"message": "Get all data",
-			"data":    arrData,
-		}
-		send, err := json.Marshal(res)
-		if err != nil {
-			log.Println("Cannot send", err.Error())
-		}
-		w.Write(send)
+func InsertUser(c echo.Context) error {
+	var tmp User
+	err := c.Bind(&tmp)
+	if err != nil {
+		log.Println("Cannot parse input to object", err.Error())
+		return c.JSON(http.StatusInternalServerError, "Error dari server")
 	}
+
+	arrData = append(arrData, tmp)
+	res := map[string]interface{}{
+		"message": "Success input data",
+		"data":    tmp,
+	}
+	return c.JSON(http.StatusOK, res)
 }
 
-func UserSpecificHandle(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("content-type", "application/json")
-	switch r.Method {
-	case "GET":
-		path := r.URL.Path
-		params := strings.Split(path, "/")
-
-		cnv, err := strconv.Atoi(params[len(params)-1])
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("Internal server error"))
-			log.Println("Cannot convert to int", err.Error())
-			return
-		}
-		if cnv > len(arrData) {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("Internal server error"))
-			log.Println("Index out of range")
-			return
-		}
-
-		res := map[string]interface{}{
-			"message": "Get all data",
-			"data":    arrData[cnv-1],
-		}
-		send, err := json.Marshal(res)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("Internal server error"))
-			log.Println("Cannot send", err.Error())
-		}
-		w.Write(send)
+func GetSpecificUser(c echo.Context) error {
+	param := c.Param("id")
+	cnv, err := strconv.Atoi(param)
+	if err != nil {
+		log.Println("Cannot convert to int", err.Error())
+		return c.JSON(http.StatusInternalServerError, "cannot convert id")
 	}
+
+	res := map[string]interface{}{
+		"message": "Get all data",
+		"data":    arrData[cnv-1],
+	}
+	return c.JSON(http.StatusOK, res)
+
 }
 
 func main() {
-	http.HandleFunc("/", HelloWorld)
-	http.HandleFunc("/user", UserHandle)
-	http.HandleFunc("/user/", UserSpecificHandle)
+	e := echo.New()
+	e.GET("/user", GetAll)
+	e.POST("/user", InsertUser)
+	e.GET("/user/:id", GetSpecificUser)
 
 	fmt.Println("Menjalankan program ....")
-	err := http.ListenAndServe(":8000", nil)
+	err := e.Start(":8000")
 	if err != nil {
 		log.Fatal(err.Error())
 	}
