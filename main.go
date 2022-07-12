@@ -34,20 +34,29 @@ func UserHandle(w http.ResponseWriter, r *http.Request) {
 		decode := json.NewDecoder(r.Body)
 		err := decode.Decode(&tmp)
 		if err != nil {
-			log.Fatal("Cannot parse", err.Error())
+			log.Println("Cannot parse", err.Error())
 		}
 		log.Println(tmp)
+		arrData = append(arrData, tmp)
 		res := map[string]interface{}{
 			"message": "Success input data",
 			"data":    tmp,
 		}
 		send, err := json.Marshal(res)
 		if err != nil {
-			log.Fatal("Cannot send", err.Error())
+			log.Println("Cannot send", err.Error())
 		}
 		w.Write(send)
 	case "GET":
-		w.Write([]byte("pending feature"))
+		res := map[string]interface{}{
+			"message": "Get all data",
+			"data":    arrData,
+		}
+		send, err := json.Marshal(res)
+		if err != nil {
+			log.Println("Cannot send", err.Error())
+		}
+		w.Write(send)
 	}
 }
 
