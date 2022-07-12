@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
+	"strings"
 )
 
 type User struct {
@@ -60,9 +62,45 @@ func UserHandle(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func UserSpecificHandle(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("content-type", "application/json")
+	switch r.Method {
+	case "GET":
+		path := r.URL.Path
+		params := strings.Split(path, "/")
+
+		cnv, err := strconv.Atoi(params[len(params)-1])
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Internal server error"))
+			log.Println("Cannot convert to int", err.Error())
+			return
+		}
+		if cnv > len(arrData) {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Internal server error"))
+			log.Println("Index out of range")
+			return
+		}
+
+		res := map[string]interface{}{
+			"message": "Get all data",
+			"data":    arrData[cnv-1],
+		}
+		send, err := json.Marshal(res)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Internal server error"))
+			log.Println("Cannot send", err.Error())
+		}
+		w.Write(send)
+	}
+}
+
 func main() {
 	http.HandleFunc("/", HelloWorld)
 	http.HandleFunc("/user", UserHandle)
+	http.HandleFunc("/user/", UserSpecificHandle)
 
 	fmt.Println("Menjalankan program ....")
 	err := http.ListenAndServe(":8000", nil)
