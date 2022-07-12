@@ -17,7 +17,10 @@ tags:
 paths:
   /user:
     post:
+      summary: Insert User Baru
       description: Menambahkan data user baru
+      tags:
+        - "User"
       requestBody:
         content:
           application/json:
@@ -27,8 +30,6 @@ paths:
               Nama: Jerry
               Email: jerry@alterra.id
               Password: jerry123
-      tags:
-        - "User"
       responses:
         500:
           $ref: "#/components/responses/500"
@@ -95,6 +96,7 @@ paths:
       parameters:
         - name: id_user
           in: path
+          description: id user dari sistem
           required: true
           schema:
             type: integer
