@@ -1,12 +1,23 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 )
 
-func UserHandle1(writer http.ResponseWriter, reader *http.Request) {
+type User struct {
+	Nama     string
+	Email    string
+	Password string
+}
+
+var (
+	arrData []User
+)
+
+func HelloWorld(writer http.ResponseWriter, reader *http.Request) {
 	switch reader.Method {
 	case "GET":
 		writer.Header().Set("content-type", "application/json")
@@ -15,8 +26,34 @@ func UserHandle1(writer http.ResponseWriter, reader *http.Request) {
 	}
 }
 
+func UserHandle(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("content-type", "application/json")
+	switch r.Method {
+	case "POST":
+		var tmp User
+		decode := json.NewDecoder(r.Body)
+		err := decode.Decode(&tmp)
+		if err != nil {
+			log.Fatal("Cannot parse", err.Error())
+		}
+		log.Println(tmp)
+		res := map[string]interface{}{
+			"message": "Success input data",
+			"data":    tmp,
+		}
+		send, err := json.Marshal(res)
+		if err != nil {
+			log.Fatal("Cannot send", err.Error())
+		}
+		w.Write(send)
+	case "GET":
+		w.Write([]byte("pending feature"))
+	}
+}
+
 func main() {
-	http.HandleFunc("/user", UserHandle1)
+	http.HandleFunc("/", HelloWorld)
+	http.HandleFunc("/user", UserHandle)
 
 	fmt.Println("Menjalankan program ....")
 	err := http.ListenAndServe(":8000", nil)
