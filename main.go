@@ -20,7 +20,6 @@ type User struct {
 
 var (
 	dataNumber int
-	// DB         *gorm.DB
 )
 
 func InitDB() *gorm.DB {
@@ -172,6 +171,10 @@ func DeleteUser(db *gorm.DB) echo.HandlerFunc {
 		}
 		return c.JSON(http.StatusOK, res)
 	}
+}
+
+func init() {
+	dataNumber = 1
 }
 
 func main() {
