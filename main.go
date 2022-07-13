@@ -6,27 +6,15 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/jackthepanda96/Belajar-Rest.git/database/mysql"
 	"github.com/jackthepanda96/Belajar-Rest.git/model"
 	"github.com/labstack/echo/v4"
-	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
 var (
 	dataNumber int
 )
-
-func InitDB() *gorm.DB {
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True", "root", "", "localhost", 3307, "echorm")
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
-
-	if err != nil {
-		log.Fatal("Cannot connect to DB")
-	}
-
-	db.AutoMigrate(model.User{})
-	return db
-}
 
 func GetAll(db *gorm.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
@@ -172,7 +160,7 @@ func init() {
 }
 
 func main() {
-	db := InitDB()
+	db := mysql.InitDB()
 	e := echo.New()
 	e.GET("/user", GetAll(db))
 	e.POST("/user", InsertUser(db))
