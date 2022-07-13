@@ -6,14 +6,15 @@ import (
 
 	"github.com/jackthepanda96/Belajar-Rest.git/controller/user"
 	"github.com/jackthepanda96/Belajar-Rest.git/database/mysql"
+	"github.com/jackthepanda96/Belajar-Rest.git/model"
 	"github.com/labstack/echo/v4"
 )
 
 func main() {
 	db := mysql.InitDB()
 	e := echo.New()
-
-	controller := user.UserController{DB: db}
+	model := model.UserModel{DB: db}
+	controller := user.UserController{Model: model}
 
 	e.GET("/user", controller.GetAll())
 	e.POST("/user", controller.InsertUser())

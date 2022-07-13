@@ -7,21 +7,18 @@ import (
 
 	"github.com/jackthepanda96/Belajar-Rest.git/model"
 	"github.com/labstack/echo/v4"
-	"gorm.io/gorm"
 )
 
 type UserController struct {
-	DB *gorm.DB
+	Model model.UserModel
 }
 
 func (uc *UserController) GetAll() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		var tmp []model.User
-		err := uc.DB.Find(&tmp).Error
+		tmp := uc.Model.GetAll()
 
-		if err != nil {
-			log.Println("Cannot retrive object", err.Error())
-			return c.JSON(http.StatusInternalServerError, "Error dari server")
+		if tmp == nil {
+			return c.JSON(http.StatusInternalServerError, "error from database")
 		}
 
 		res := map[string]interface{}{
@@ -34,8 +31,6 @@ func (uc *UserController) GetAll() echo.HandlerFunc {
 
 func (uc *UserController) GetSpecificUser() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		var tmp model.User
-
 		param := c.Param("id")
 		cnv, err := strconv.Atoi(param)
 		if err != nil {
@@ -43,15 +38,15 @@ func (uc *UserController) GetSpecificUser() echo.HandlerFunc {
 			return c.JSON(http.StatusInternalServerError, "cannot convert id")
 		}
 
-		err = uc.DB.Where("ID = ?", cnv).First(&tmp).Error
-		if err != nil {
-			log.Println("There is a problem with data", err.Error())
+		data := uc.Model.GetSpecific(cnv)
+
+		if data.ID == 0 {
 			return c.JSON(http.StatusBadRequest, "no data")
 		}
 
 		res := map[string]interface{}{
 			"message": "Get all data",
-			"data":    tmp,
+			"data":    data,
 		}
 		return c.JSON(http.StatusOK, res)
 	}
@@ -66,15 +61,15 @@ func (uc *UserController) InsertUser() echo.HandlerFunc {
 			return c.JSON(http.StatusInternalServerError, "Error dari server")
 		}
 
-		err = uc.DB.Create(&tmp).Error
-		if err != nil {
-			log.Println("Cannot create object", err.Error())
+		data := uc.Model.Insert(tmp)
+
+		if data.ID == 0 {
 			return c.JSON(http.StatusInternalServerError, "Error dari server")
 		}
 
 		res := map[string]interface{}{
 			"message": "Success input data",
-			"data":    tmp,
+			"data":    data,
 		}
 		return c.JSON(http.StatusOK, res)
 	}
@@ -108,16 +103,15 @@ func (uc *UserController) UpdateUser() echo.HandlerFunc {
 		if tmp.Password != "" {
 			qry["password"] = tmp.Password
 		}
-		var ret model.User
-		err = uc.DB.Model(&ret).Where("ID = ?", cnv).Updates(qry).Error
-		if err != nil {
-			log.Println("Cannot update data", err.Error())
+		data := uc.Model.Update(cnv, tmp)
+
+		if data.ID == 0 {
 			return c.JSON(http.StatusInternalServerError, "cannot update")
 		}
 
 		res := map[string]interface{}{
 			"message": "Success update data",
-			"data":    ret,
+			"data":    data,
 		}
 
 		return c.JSON(http.StatusOK, res)
@@ -133,9 +127,7 @@ func (uc *UserController) DeleteUser() echo.HandlerFunc {
 			return c.JSON(http.StatusInternalServerError, "cannot convert id")
 		}
 
-		err = uc.DB.Where("ID = ?", cnv).Delete(&model.User{}).Error
-		if err != nil {
-			log.Println("Cannot delete data", err.Error())
+		if !uc.Model.Delete(cnv) {
 			return c.JSON(http.StatusInternalServerError, "cannot delete")
 		}
 
