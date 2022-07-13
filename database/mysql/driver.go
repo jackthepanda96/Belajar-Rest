@@ -21,5 +21,5 @@ func InitDB() *gorm.DB {
 }
 
 func MigrateData(db *gorm.DB) {
-	db.AutoMigrate(model.User{})
+	db.AutoMigrate(model.User{}, model.Book{})
 }

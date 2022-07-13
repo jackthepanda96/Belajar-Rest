@@ -11,6 +11,7 @@ type User struct {
 	Nama     string `json:"nama" form:"nama"`
 	Email    string `json:"email" form:"email"`
 	Password string `json:"password" form:"password"`
+	Buku     []Book `gorm:"foreignKey:Pemilik"`
 }
 
 type UserModel struct {
