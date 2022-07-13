@@ -88,7 +88,50 @@ func InsertUser(c echo.Context) error {
 }
 
 func UpdateUser(c echo.Context) error {
-	return nil
+	param := c.Param("id")
+	cnv, err := strconv.Atoi(param)
+	if err != nil {
+		log.Println("Cannot convert to int", err.Error())
+		return c.JSON(http.StatusInternalServerError, "cannot convert id")
+	}
+
+	if cnv > len(arrData) {
+		log.Println("Index out of range")
+		return c.JSON(http.StatusInternalServerError, "Index out of range")
+	}
+
+	var tmp User
+	err = c.Bind(&tmp)
+	if err != nil {
+		log.Println("Cannot parse input to object", err.Error())
+		return c.JSON(http.StatusInternalServerError, "Error dari server")
+	}
+
+	idxData, isFound := cariData(cnv)
+
+	if !isFound {
+		log.Println("Data not found")
+		return c.JSON(http.StatusNotFound, "Data not found")
+	}
+	// arrData[idxData] = tmp --> update smua
+	if tmp.Nama != "" {
+		arrData[idxData].Nama = tmp.Nama
+	}
+
+	if tmp.Email != "" {
+		arrData[idxData].Email = tmp.Email
+	}
+
+	if tmp.Password != "" {
+		arrData[idxData].Password = tmp.Password
+	}
+
+	res := map[string]interface{}{
+		"message": "Success update data",
+		"data":    arrData[idxData],
+	}
+
+	return c.JSON(http.StatusOK, res)
 }
 
 func DeleteUser(c echo.Context) error {
@@ -127,6 +170,7 @@ func main() {
 	e.GET("/user", GetAll)
 	e.POST("/user", InsertUser)
 	e.GET("/user/:id", GetSpecificUser)
+	e.PUT("/user/:id", UpdateUser)
 	e.DELETE("/user/:id", DeleteUser)
 
 	fmt.Println("Menjalankan program ....")
