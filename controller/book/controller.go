@@ -50,5 +50,4 @@ func (bc *BookController) GetAllBook() echo.HandlerFunc {
 			"data":    data,
 		})
 	}
-
 }

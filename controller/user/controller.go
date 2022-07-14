@@ -15,6 +15,7 @@ type UserController struct {
 
 func (uc *UserController) GetAll() echo.HandlerFunc {
 	return func(c echo.Context) error {
+		log.Println(c.Request().Header)
 		tmp := uc.Model.GetAll()
 
 		if tmp == nil {

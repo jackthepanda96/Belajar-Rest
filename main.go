@@ -2,13 +2,14 @@ package main
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/jackthepanda96/Belajar-Rest.git/controller/book"
 	"github.com/jackthepanda96/Belajar-Rest.git/controller/user"
 	"github.com/jackthepanda96/Belajar-Rest.git/database/mysql"
+	"github.com/jackthepanda96/Belajar-Rest.git/middlewares"
 	"github.com/jackthepanda96/Belajar-Rest.git/model"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 func main() {
@@ -21,6 +22,16 @@ func main() {
 	bookModel := model.BookModel{DB: db}
 	bookController := book.BookController{Model: bookModel}
 
+	e.Pre(middleware.RemoveTrailingSlash())
+
+	e.Use(middleware.CORS()) //WAJIB!!
+	// e.Use(middleware.Logger()) //WAJIB!!
+	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+		Format: "method=${method}, uri=${uri}, status=${status}\n",
+	}))
+
+	// e.Use(middleware.BasicAuth(middlewares.CekAuth))
+
 	user := e.Group("/user")
 	user.GET("", userController.GetAll())
 	user.POST("", userController.InsertUser())
@@ -28,13 +39,11 @@ func main() {
 	user.PUT("/:id", userController.UpdateUser())
 	user.DELETE("/:id", userController.DeleteUser())
 
-	book := e.Group("/book")
+	book := e.Group("/book", middleware.BasicAuth(middlewares.CekAuth))
 	book.GET("", bookController.GetAllBook())
 	book.POST("", bookController.InsertBook())
 
 	fmt.Println("Menjalankan program ....")
-	err := e.Start(":8000")
-	if err != nil {
-		log.Fatal(err.Error())
-	}
+	e.Logger.Fatal(e.Start(":8000"))
+
 }
