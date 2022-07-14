@@ -2,8 +2,10 @@ package middlewares
 
 import (
 	"log"
+	"strings"
 
 	"github.com/golang-jwt/jwt"
+	"github.com/labstack/echo/v4"
 )
 
 func GenerateToken(ID int) string {
@@ -17,4 +19,22 @@ func GenerateToken(ID int) string {
 	}
 
 	return token
+}
+
+func ExtractData(c echo.Context) int {
+	head := c.Request().Header
+	token := strings.Split(head.Get("Authorization"), " ")
+
+	res, _ := jwt.Parse(token[len(token)-1], func(t *jwt.Token) (interface{}, error) {
+		return []byte("R4h@s1A!"), nil
+	})
+
+	if res.Valid {
+		resClaim := res.Claims.(jwt.MapClaims)
+		// log.Println(resClaim["ID"])
+		parseID := resClaim["ID"].(float64)
+		return int(parseID)
+	}
+
+	return -1
 }

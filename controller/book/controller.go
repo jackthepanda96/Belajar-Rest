@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/jackthepanda96/Belajar-Rest.git/middlewares"
 	"github.com/jackthepanda96/Belajar-Rest.git/model"
 	"github.com/labstack/echo/v4"
 )
@@ -15,12 +16,19 @@ type BookController struct {
 func (bc *BookController) InsertBook() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var input model.Book
+		ownerID := middlewares.ExtractData(c)
+
+		if ownerID == -1 {
+			return c.JSON(http.StatusForbidden, "Token error")
+		}
 
 		err := c.Bind(&input)
 		if err != nil {
 			log.Println("Kesalahan input dari user")
 			return c.JSON(http.StatusBadRequest, "Incorrect input from user")
 		}
+
+		input.Pemilik = ownerID
 
 		data := bc.Model.Insert(input)
 
