@@ -5,17 +5,42 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/jackthepanda96/Belajar-Rest.git/middlewares"
 	"github.com/jackthepanda96/Belajar-Rest.git/model"
 	"github.com/labstack/echo/v4"
 )
 
 type UserController struct {
 	Model model.UserModel
+	Auth  model.LoginModel
+}
+
+func (uc *UserController) Login() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		var loginData model.Login
+
+		if err := c.Bind(&loginData); err != nil {
+			log.Println("invalid input")
+			return c.JSON(http.StatusBadRequest, "invalid input")
+		}
+
+		data := uc.Auth.DoLogin(loginData)
+
+		if data.ID == 0 {
+			log.Println("data not found")
+			return c.JSON(http.StatusNotFound, "data not found, cannot login")
+		}
+		token := middlewares.GenerateToken(data.ID)
+		return c.JSON(http.StatusFound, map[string]interface{}{
+			"message": "success login",
+			"token":   token,
+			"data":    data,
+		})
+	}
 }
 
 func (uc *UserController) GetAll() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		log.Println(c.Request().Header)
 		tmp := uc.Model.GetAll()
 
 		if tmp == nil {

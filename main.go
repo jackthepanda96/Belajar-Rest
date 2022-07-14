@@ -16,8 +16,9 @@ func main() {
 	db := mysql.InitDB()
 	mysql.MigrateData(db)
 	e := echo.New()
+	loginModel := model.LoginModel{DB: db}
 	userModel := model.UserModel{DB: db}
-	userController := user.UserController{Model: userModel}
+	userController := user.UserController{Model: userModel, Auth: loginModel}
 
 	bookModel := model.BookModel{DB: db}
 	bookController := book.BookController{Model: bookModel}
@@ -32,8 +33,10 @@ func main() {
 
 	// e.Use(middleware.BasicAuth(middlewares.CekAuth))
 
+	e.POST("/login", userController.Login())
+
 	user := e.Group("/user")
-	user.GET("", userController.GetAll())
+	user.GET("", userController.GetAll(), middleware.JWT([]byte("R4h@s1A!")))
 	user.POST("", userController.InsertUser())
 	user.GET("/:id", userController.GetSpecificUser())
 	user.PUT("/:id", userController.UpdateUser())
