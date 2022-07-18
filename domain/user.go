@@ -14,8 +14,8 @@ type UserUseCase interface {
 
 type UserData interface {
 	Insert(newUser User) User
-	Update(userID int, updatedData User) User
-	Delete(userID int) bool
 	GetAll() []User
-	GetSpecific(userID int) User
+	// Update(userID int, updatedData User) User
+	// Delete(userID int) bool
+	// GetSpecific(userID int) User
 }
