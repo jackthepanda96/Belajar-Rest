@@ -1,6 +1,7 @@
 package data
 
 import (
+	"errors"
 	"log"
 
 	"github.com/jackthepanda96/Belajar-Rest.git/domain"
@@ -17,15 +18,15 @@ func New(db *gorm.DB) domain.UserData {
 	}
 }
 
-func (ud *userData) Insert(newUser domain.User) domain.User {
+func (ud *userData) Insert(newUser domain.User) (domain.User, error) {
 	var cnv = FromModel(newUser)
 	err := ud.db.Create(&cnv).Error
 	if err != nil {
 		log.Println("Cannot create object", err.Error())
-		return domain.User{}
+		return domain.User{}, err
 	}
 
-	return cnv.ToModel()
+	return cnv.ToModel(), nil
 }
 func (ud *userData) Update(userID int, updatedData domain.User) domain.User {
 	var cnv = FromModel(updatedData)
@@ -51,15 +52,21 @@ func (ud *userData) Delete(userID int) bool {
 
 	return true
 }
-func (ud *userData) GetAll() []domain.User {
+func (ud *userData) GetAll() ([]domain.User, error) {
 	var tmp []User
 	err := ud.db.Find(&tmp).Error
 
 	if err != nil {
 		log.Println("Cannot retrive object", err.Error())
-		return nil
+		return nil, errors.New("cannot retrieve data")
 	}
-	return ParseToArr(tmp)
+
+	if len(tmp) == 0 {
+		log.Println("No data found", gorm.ErrRecordNotFound.Error())
+		return nil, gorm.ErrRecordNotFound
+	}
+
+	return ParseToArr(tmp), nil
 }
 func (ud *userData) GetSpecific(userID int) domain.User {
 	var tmp User

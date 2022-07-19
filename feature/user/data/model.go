@@ -7,9 +7,9 @@ import (
 
 type User struct {
 	ID       int         `json:"id" form:"id" gorm:"prmaryKey;autoIncrement"`
-	Nama     string      `json:"nama" form:"nama"`
-	Email    string      `json:"email" form:"email"`
-	Password string      `json:"password" form:"password"`
+	Nama     string      `json:"nama" form:"nama" validate:"required"`
+	Email    string      `json:"email" form:"email" validate:"required,email"`
+	Password string      `json:"password" form:"password" validate:"required"`
 	Buku     []data.Book `gorm:"foreignKey:Pemilik"`
 }
 

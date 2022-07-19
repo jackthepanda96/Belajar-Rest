@@ -3,6 +3,7 @@ package delivery
 import (
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/jackthepanda96/Belajar-Rest.git/domain"
 
@@ -18,6 +19,7 @@ func New(e *echo.Echo, us domain.UserUseCase) {
 		userUsecase: us,
 	}
 	e.POST("/user", handler.InsertUser())
+	e.GET("/user", handler.GetAllUser())
 }
 
 func (uh *userHandler) InsertUser() echo.HandlerFunc {
@@ -41,6 +43,26 @@ func (uh *userHandler) InsertUser() echo.HandlerFunc {
 			"message": "success create data",
 			"data":    data,
 		})
+	}
+}
 
+func (uh *userHandler) GetAllUser() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		data, err := uh.userUsecase.GetAll()
+
+		if err != nil {
+			if strings.Contains(err.Error(), "not found") {
+				log.Println("User Handler", err)
+				c.JSON(http.StatusNotFound, err.Error())
+			} else if strings.Contains(err.Error(), "retrieve") {
+				log.Println("User Handler", err)
+				c.JSON(http.StatusInternalServerError, err.Error())
+			}
+		}
+
+		return c.JSON(http.StatusOK, map[string]interface{}{
+			"message": "success get all user data",
+			"data":    data,
+		})
 	}
 }

@@ -3,6 +3,7 @@ package factory
 import (
 	"gorm.io/gorm"
 
+	"github.com/go-playground/validator/v10"
 	bd "github.com/jackthepanda96/Belajar-Rest.git/feature/book/data"
 	bookDelivery "github.com/jackthepanda96/Belajar-Rest.git/feature/book/delivery"
 	"github.com/labstack/echo/v4"
@@ -18,7 +19,8 @@ import (
 
 func InitFactory(e *echo.Echo, db *gorm.DB) {
 	userData := ud.New(db)
-	useCase := us.New(userData)
+	validator := validator.New()
+	useCase := us.New(userData, validator)
 	userDelivery.New(e, useCase)
 
 	bookData := bd.New(db)
