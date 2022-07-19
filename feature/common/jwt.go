@@ -1,4 +1,4 @@
-package middlewares
+package common
 
 import (
 	"log"
@@ -6,7 +6,7 @@ import (
 
 	"github.com/golang-jwt/jwt"
 	"github.com/jackthepanda96/Belajar-Rest.git/config"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 func GenerateToken(ID int) string {

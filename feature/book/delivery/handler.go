@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/jackthepanda96/Belajar-Rest.git/domain"
-	"github.com/jackthepanda96/Belajar-Rest.git/feature/book/delivery/middlewares"
+	"github.com/jackthepanda96/Belajar-Rest.git/feature/common"
 	"github.com/labstack/echo/v4"
 )
 
@@ -29,7 +29,7 @@ func (bh *bookHandler) InsertUser() echo.HandlerFunc {
 			c.JSON(http.StatusBadRequest, "error read input")
 		}
 
-		data, err := bh.bookUsecase.AddBook(middlewares.ExtractData(c), tmp.ToDomain())
+		data, err := bh.bookUsecase.AddBook(common.ExtractData(c), tmp.ToDomain())
 
 		if err != nil {
 			log.Println("Cannot proces data", err)

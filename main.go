@@ -6,6 +6,7 @@ import (
 	"github.com/jackthepanda96/Belajar-Rest.git/config"
 	"github.com/jackthepanda96/Belajar-Rest.git/factory"
 	"github.com/jackthepanda96/Belajar-Rest.git/infrastructure/database/mysql"
+
 	"github.com/labstack/echo/v4"
 )
 
