@@ -35,6 +35,27 @@ func (_m *UserData) GetAll() ([]domain.User, error) {
 	return r0, r1
 }
 
+// GetSpecific provides a mock function with given fields: userID
+func (_m *UserData) GetSpecific(userID int) (domain.User, error) {
+	ret := _m.Called(userID)
+
+	var r0 domain.User
+	if rf, ok := ret.Get(0).(func(int) domain.User); ok {
+		r0 = rf(userID)
+	} else {
+		r0 = ret.Get(0).(domain.User)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(int) error); ok {
+		r1 = rf(userID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // Insert provides a mock function with given fields: newUser
 func (_m *UserData) Insert(newUser domain.User) (domain.User, error) {
 	ret := _m.Called(newUser)

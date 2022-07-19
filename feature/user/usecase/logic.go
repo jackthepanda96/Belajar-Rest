@@ -62,6 +62,20 @@ func (ud *userUseCase) GetAll() ([]domain.User, error) {
 
 	return data, nil
 }
+func (ud *userUseCase) GetProfile(id int) (domain.User, error) {
+	data, err := ud.userData.GetSpecific(id)
+
+	if err != nil {
+		log.Println("Use case", err.Error())
+		if err == gorm.ErrRecordNotFound {
+			return domain.User{}, errors.New("data not found")
+		} else {
+			return domain.User{}, errors.New("server error")
+		}
+	}
+
+	return data, nil
+}
 
 // func (ud *userUseCase) GetSpecific() {
 

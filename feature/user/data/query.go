@@ -28,6 +28,16 @@ func (ud *userData) Insert(newUser domain.User) (domain.User, error) {
 
 	return cnv.ToModel(), nil
 }
+func (ud *userData) GetSpecific(userID int) (domain.User, error) {
+	var tmp User
+	err := ud.db.Where("ID = ?", userID).First(&tmp).Error
+	if err != nil {
+		log.Println("There is a problem with data", err.Error())
+		return domain.User{}, err
+	}
+
+	return tmp.ToModel(), nil
+}
 func (ud *userData) Update(userID int, updatedData domain.User) domain.User {
 	var cnv = FromModel(updatedData)
 	err := ud.db.Model(&User{}).Where("ID = ?", userID).Updates(updatedData).Error
@@ -67,14 +77,4 @@ func (ud *userData) GetAll() ([]domain.User, error) {
 	}
 
 	return ParseToArr(tmp), nil
-}
-func (ud *userData) GetSpecific(userID int) domain.User {
-	var tmp User
-	err := ud.db.Where("ID = ?", userID).First(&tmp).Error
-	if err != nil {
-		log.Println("There is a problem with data", err.Error())
-		return domain.User{}
-	}
-
-	return tmp.ToModel()
 }
